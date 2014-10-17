@@ -32,13 +32,13 @@ set +o xtrace
 HEAT_DIR=$DEST/heat
 HEATCLIENT_DIR=$DEST/python-heatclient
 HEAT_CFNTOOLS_DIR=$DEST/heat-cfntools
-HEAT_TEMPLATES_REPO_DIR=$DEST/heat-templates
+HEAT_TEMPLATES_DIR=$DEST/heat-templates
 HEAT_AUTH_CACHE_DIR=${HEAT_AUTH_CACHE_DIR:-/var/cache/heat}
 HEAT_STANDALONE=`trueorfalse False $HEAT_STANDALONE`
 HEAT_CONF_DIR=/etc/heat
 HEAT_CONF=$HEAT_CONF_DIR/heat.conf
 HEAT_ENV_DIR=$HEAT_CONF_DIR/environment.d
-HEAT_TEMPLATES_DIR=$HEAT_CONF_DIR/templates
+HEAT_TEMPLATES_CONF_DIR=$HEAT_CONF_DIR/templates
 HEAT_STACK_DOMAIN=`trueorfalse True $HEAT_STACK_DOMAIN`
 HEAT_API_HOST=${HEAT_API_HOST:-$HOST_IP}
 HEAT_API_PORT=${HEAT_API_PORT:-8004}
@@ -65,7 +65,7 @@ function is_heat_enabled {
 function cleanup_heat {
     sudo rm -rf $HEAT_AUTH_CACHE_DIR
     sudo rm -rf $HEAT_ENV_DIR
-    sudo rm -rf $HEAT_TEMPLATES_DIR
+    sudo rm -rf $HEAT_TEMPLATES_CONF_DIR
 }
 
 # configure_heat() - Set config files, create data dirs, etc
@@ -157,10 +157,10 @@ function configure_heat {
     cp $HEAT_DIR/etc/heat/environment.d/* $HEAT_ENV_DIR/
 
     # heat template resources.
-    sudo mkdir -p $HEAT_TEMPLATES_DIR
-    sudo chown $STACK_USER $HEAT_TEMPLATES_DIR
+    sudo mkdir -p $HEAT_TEMPLATES_CONF_DIR
+    sudo chown $STACK_USER $HEAT_TEMPLATES_CONF_DIR
     # copy the default templates
-    cp $HEAT_DIR/etc/heat/templates/* $HEAT_TEMPLATES_DIR/
+    cp $HEAT_DIR/etc/heat/templates/* $HEAT_TEMPLATES_CONF_DIR/
 
 }
 
@@ -196,7 +196,7 @@ function install_heat {
 # install_heat_other() - Collect source and prepare
 function install_heat_other {
     git_clone $HEAT_CFNTOOLS_REPO $HEAT_CFNTOOLS_DIR $HEAT_CFNTOOLS_BRANCH
-    git_clone $HEAT_TEMPLATES_REPO $HEAT_TEMPLATES_REPO_DIR $HEAT_TEMPLATES_BRANCH
+    git_clone $HEAT_TEMPLATES_REPO $HEAT_TEMPLATES_DIR $HEAT_TEMPLATES_BRANCH
 }
 
 # start_heat() - Start running processes, including screen
@@ -302,7 +302,7 @@ function build_heat_functional_test_image {
         heat-config heat-config-cfn-init heat-config-puppet heat-config-script"
 
     # Elements path for tripleo-image-elements and heat-templates software-config
-    local elements_path=$TIE_DIR/elements:$HEAT_TEMPLATES_REPO_DIR/hot/software-config/elements
+    local elements_path=$TIE_DIR/elements:$HEAT_TEMPLATES_DIR/hot/software-config/elements
 
     disk_image_create_upload "$image_name" "$image_elements" "$elements_path"
     iniset $TEMPEST_CONFIG orchestration image_ref $image_name
