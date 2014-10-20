@@ -1098,7 +1098,7 @@ if is_service_enabled n-net q-dhcp; then
     fi
 
     # Force IP forwarding on, just in case
-    sudo sysctl -w net.ipv4.ip_forward=1
+    #sudo sysctl -w net.ipv4.ip_forward=1
 fi
 
 
